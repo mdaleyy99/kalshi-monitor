@@ -3,574 +3,297 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Kalshi Bot Monitor v2</title>
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<title>Kalshi Bot Monitor</title>
 <style>
-*{margin:0;padding:0;box-sizing:border-box}
-body{background:#F0F4FF;font-family:-apple-system,BlinkMacSystemFont,'SF Pro',sans-serif;min-height:100vh;color:#1A1A2E}
-.nav{background:#0D1117;height:56px;padding:0 24px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 2px 16px rgba(0,0,0,.4)}
-.brand{color:#fff;font-size:15px;font-weight:700;display:flex;align-items:center;gap:10px}
-.brand .v{background:rgba(255,255,255,.15);color:#fff;border-radius:6px;padding:2px 8px;font-size:10px;font-weight:700}
-.nav-r{display:flex;align-items:center;gap:10px}
-.pill{display:flex;align-items:center;gap:6px;background:rgba(255,255,255,.1);border-radius:20px;padding:5px 12px;font-size:12px;font-weight:600;color:#fff}
-.dot{width:7px;height:7px;border-radius:50%;background:#4ADE80;box-shadow:0 0 6px #4ADE80;animation:pulse 2s infinite}
-.dot.off{background:#ff4444;box-shadow:none;animation:none}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
-.mode-badge{background:#fff;color:#0D1117;border-radius:8px;padding:4px 10px;font-size:11px;font-weight:700}
-.settings-btn{background:rgba(255,255,255,.1);border:none;color:#fff;border-radius:8px;padding:5px 10px;cursor:pointer;font-size:14px}
-.offline-banner{display:none;background:#FEF2F2;border-bottom:2px solid #DC2626;padding:10px 24px;font-size:13px;font-weight:700;color:#DC2626;text-align:center}
-.wrap{padding:20px 24px;max-width:1440px;margin:0 auto}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0f1117;color:#e1e4f0;min-height:100vh}
+  header{background:#161b2e;border-bottom:1px solid #252d45;padding:14px 24px;display:flex;align-items:center;justify-content:space-between}
+  header h1{font-size:15px;font-weight:700;letter-spacing:.5px;color:#fff}
+  #status-dot{width:10px;height:10px;border-radius:50%;background:#6b7280;display:inline-block;margin-right:8px}
+  #status-text{font-size:12px;font-weight:600;color:#6b7280}
+  #last-fetch{font-size:11px;color:#4b5563;margin-left:12px}
 
-/* STAT CARDS */
-.cards{display:grid;grid-template-columns:repeat(6,1fr);gap:12px;margin-bottom:20px}
-.card{background:#fff;border-radius:12px;padding:18px 20px;border:1px solid #E2E8FF;box-shadow:0 1px 4px rgba(0,0,0,.06);transition:transform .15s,box-shadow .15s}.card:hover{transform:translateY(-2px);box-shadow:0 4px 12px rgba(0,0,0,.1)}
-.card .lbl{font-size:10px;color:#9099B5;font-weight:700;letter-spacing:.8px;text-transform:uppercase;margin-bottom:10px}
-.card .val{font-size:28px;font-weight:800;line-height:1;color:#1A1A2E}
-.card .sub{font-size:11px;color:#9099B5;margin-top:6px}
-.pnl-big{font-size:36px;font-weight:900;letter-spacing:-1px}
-.blue{color:#0057FF!important}.green{color:#16A34A!important}.red{color:#DC2626!important}.yellow{color:#D97706!important}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;padding:20px 24px 0}
+  .card{background:#161b2e;border:1px solid #252d45;border-radius:10px;padding:16px}
+  .card .lbl{font-size:10px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:#4b5563;margin-bottom:8px}
+  .card .val{font-size:26px;font-weight:800;letter-spacing:-0.5px}
+  .card .sub{font-size:11px;color:#4b5563;margin-top:4px}
 
-/* SECTION */
-.sec{background:#fff;border-radius:12px;padding:20px 24px;margin-bottom:16px;border:1px solid #E2E8FF;box-shadow:0 1px 4px rgba(0,0,0,.06)}
-.sec-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
-.sec-ttl{font-size:11px;font-weight:700;color:#9099B5;letter-spacing:.8px;text-transform:uppercase}
-.tag{border-radius:20px;padding:3px 10px;font-size:10px;font-weight:700}
-.tag.live{background:#ECFDF5;color:#16A34A}
-.tag.neutral{background:#EEF2FF;color:#0057FF}
-.tag.warn{background:#FFF7ED;color:#D97706}
+  .section{padding:20px 24px 0}
+  .section h2{font-size:10px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:#4b5563;margin-bottom:12px}
 
-/* TWO COLUMN LAYOUT */
-.two-col{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
+  /* Momentum bars */
+  .mom-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .mom-card{background:#161b2e;border:1px solid #252d45;border-radius:10px;padding:14px}
+  .mom-card .asset{font-size:11px;font-weight:700;color:#4b5563;letter-spacing:.8px;text-transform:uppercase;margin-bottom:6px}
+  .mom-card .pct{font-size:28px;font-weight:900;letter-spacing:-1px;margin-bottom:8px}
+  .bar-track{background:#252d45;border-radius:4px;height:6px;width:100%;overflow:hidden}
+  .bar-fill{height:100%;border-radius:4px;transition:width .4s,background .4s;width:0%}
+  .mom-card .hint{font-size:10px;color:#4b5563;margin-top:6px}
 
-/* PARAMS */
-.param-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
-.param{background:#F8FAFF;border:1px solid #E2E8FF;border-radius:8px;padding:10px 14px}
-.param .pk{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.8px;color:#9099B5;margin-bottom:4px}
-.param .pv{font-size:15px;font-weight:800;color:#1A1A2E}
+  /* Trade log */
+  table{width:100%;border-collapse:collapse;font-size:12px}
+  thead th{text-align:left;padding:8px 10px;font-size:10px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:#4b5563;border-bottom:1px solid #252d45}
+  tbody tr{border-bottom:1px solid #1a2035}
+  tbody tr:hover{background:#1a2035}
+  tbody td{padding:8px 10px;color:#c9cfe0}
+  .badge{display:inline-block;padding:2px 7px;border-radius:4px;font-size:10px;font-weight:700;letter-spacing:.4px}
+  .badge-entry{background:#1e3a5f;color:#60a5fa}
+  .badge-tp{background:#14532d;color:#4ade80}
+  .badge-sl{background:#450a0a;color:#f87171}
+  .badge-timeout{background:#2d1b00;color:#fb923c}
+  .badge-other{background:#1e293b;color:#94a3b8}
 
-/* MARKET CARDS */
-.mkt-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
-.mkt-card{background:#F8FAFF;border:1px solid #E2E8FF;border-radius:10px;padding:14px;position:relative;overflow:hidden}
-.mkt-card::before{content:'';position:absolute;top:0;left:0;width:3px;height:100%}
-.mkt-card.btc::before{background:#F7931A}
-.mkt-card.eth::before{background:#627EEA}
-.mkt-asset{font-size:9px;font-weight:800;letter-spacing:1px;text-transform:uppercase;margin-bottom:4px}
-.mkt-ticker{font-size:11px;font-weight:600;color:#1A1A2E;margin-bottom:8px}
-.mkt-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px}
-.mkt-prices{display:flex;gap:8px;align-items:center}
-.mkt-yes{font-size:14px;font-weight:800;color:#16A34A}
-.mkt-no{font-size:14px;font-weight:800;color:#DC2626}
-.mkt-floor{font-size:11px;color:#9099B5;margin-top:2px}
-.mkt-timer{font-size:13px;font-weight:700;color:#D97706}
-.yes-bar{height:4px;border-radius:2px;background:#E2E8FF;margin-top:8px;overflow:hidden}
-.yes-fill{height:100%;border-radius:2px;background:#16A34A;transition:width .5s}
+  /* Open positions */
+  .pos-list{display:flex;flex-direction:column;gap:8px}
+  .pos-item{background:#161b2e;border:1px solid #252d45;border-radius:8px;padding:12px 14px;display:flex;justify-content:space-between;align-items:center;font-size:12px}
+  .pos-item .ticker{font-weight:700;color:#e1e4f0;font-size:13px}
+  .pos-item .meta{color:#4b5563;font-size:11px;margin-top:2px}
+  .pos-item .price{font-size:18px;font-weight:800}
 
-/* CHART STATS */
-.chart-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:14px}
-.cstat{background:#F8FAFF;border-radius:8px;padding:12px;text-align:center;border:1px solid #E2E8FF}
-.cstat .cl{font-size:10px;color:#9099B5;font-weight:700;text-transform:uppercase;margin-bottom:4px}
-.cstat .cv{font-size:18px;font-weight:800;color:#1A1A2E}
-
-/* POSITIONS */
-.pos-row{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;background:#F8FAFF;border-radius:8px;margin-bottom:8px;border:1px solid #E2E8FF;border-left:3px solid #0057FF}
-.pos-left .pq{font-size:13px;font-weight:600}
-.pos-left .pm{font-size:11px;color:#9099B5;margin-top:3px}
-.pos-right{display:flex;gap:8px;align-items:center}
-.badge{border-radius:6px;padding:4px 10px;font-size:11px;font-weight:700}
-.badge.yes{background:#ECFDF5;color:#16A34A}
-.badge.no{background:#FEF2F2;color:#DC2626}
-.badge.asset{background:#EEF2FF;color:#0057FF}
-
-/* TABLE */
-table{width:100%;border-collapse:collapse}
-th{font-size:10px;color:#9099B5;text-transform:uppercase;letter-spacing:.8px;padding:8px 10px;border-bottom:2px solid #E2E8FF;font-weight:700;text-align:left}
-td{font-size:12px;color:#374151;padding:9px 10px;border-bottom:1px solid #F1F5F9}
-tr:hover td{background:#F8FAFF}
-.tg{color:#16A34A!important;font-weight:700}.tr{color:#DC2626!important;font-weight:700}.tb{color:#0057FF!important;font-weight:700}
-.ev-entry{background:#EEF2FF;color:#0057FF;border-radius:5px;padding:2px 7px;font-size:10px;font-weight:700}
-.ev-tp{background:#ECFDF5;color:#16A34A;border-radius:5px;padding:2px 7px;font-size:10px;font-weight:700}
-.ev-sl{background:#FEF2F2;color:#DC2626;border-radius:5px;padding:2px 7px;font-size:10px;font-weight:700}
-.ev-tm{background:#FFF7ED;color:#D97706;border-radius:5px;padding:2px 7px;font-size:10px;font-weight:700}
-.ev-mc{background:#F3F4F6;color:#6B7280;border-radius:5px;padding:2px 7px;font-size:10px;font-weight:700}
-
-.empty{color:#CBD5E1;font-size:12px;text-align:center;padding:24px}
-.footer{display:flex;justify-content:space-between;font-size:10px;color:#9099B5;margin-top:8px;padding:0 4px}
+  .green{color:#4ade80}
+  .red{color:#f87171}
+  .dim{color:#4b5563}
+  .footer{padding:16px 24px 32px;font-size:11px;color:#2d3748;text-align:center}
+  .offline-bar{display:none;background:#450a0a;border-bottom:2px solid #dc2626;padding:8px 24px;font-size:12px;font-weight:700;color:#f87171;text-align:center}
 </style>
 </head>
 <body>
 
-<div class="nav">
-  <div class="brand">🤖 Kalshi Bot <span class="v" id="nav-mode">PAPER</span></div>
-  <div class="nav-r">
-    <div class="pill"><div class="dot off" id="dot"></div><span id="status">Connecting…</span></div>
-    <div class="mode-badge" id="mode-badge">PAPER</div>
-    <button class="settings-btn" onclick="openSettings()" title="Set bot URL">⚙️</button>
+<div class="offline-bar" id="offline-bar">⚠️ BOT OFFLINE — state is stale</div>
+
+<header>
+  <h1>🤖 Kalshi Paper Bot</h1>
+  <div style="display:flex;align-items:center">
+    <span id="status-dot"></span>
+    <span id="status-text">Connecting…</span>
+    <span id="last-fetch"></span>
+  </div>
+</header>
+
+<!-- Top stat cards -->
+<div class="grid">
+  <div class="card">
+    <div class="lbl">Daily P&amp;L</div>
+    <div class="val dim" id="c-pnl">—</div>
+    <div class="sub" id="c-trades">0 trades today</div>
+  </div>
+  <div class="card">
+    <div class="lbl">Win Rate</div>
+    <div class="val dim" id="c-wr">—</div>
+    <div class="sub" id="c-wl">0W / 0L</div>
+  </div>
+  <div class="card">
+    <div class="lbl">Open Positions</div>
+    <div class="val dim" id="c-open">0</div>
+    <div class="sub">max 3</div>
+  </div>
+  <div class="card">
+    <div class="lbl">BTC Price</div>
+    <div class="val dim" id="c-btc">—</div>
+    <div class="sub">Coinbase live</div>
+  </div>
+  <div class="card">
+    <div class="lbl">ETH Price</div>
+    <div class="val dim" id="c-eth">—</div>
+    <div class="sub">Coinbase live</div>
   </div>
 </div>
 
-<div class="offline-banner" id="offline-banner">⚠️ BOT OFFLINE — Last seen <span id="last-seen">—</span></div>
-
-<div class="wrap">
-
-  <!-- STAT CARDS -->
-  <div class="cards">
-    <div class="card">
-      <div class="lbl">Daily P&L</div>
-      <div style="display:flex;align-items:baseline;gap:10px">
-        <div class="pnl-big" id="s-pnl" style="color:#9099B5">$0.00</div>
-        <div id="s-pnl-pct" style="font-size:16px;font-weight:800;color:#9099B5">0.00%</div>
-      </div>
-      <div class="sub" id="s-wr">No trades yet</div>
+<!-- Momentum -->
+<div class="section">
+  <h2>45s Momentum — threshold ±0.20% to trigger</h2>
+  <div class="mom-row">
+    <div class="mom-card">
+      <div class="asset">BTC</div>
+      <div class="pct dim" id="m-btc">0.000%</div>
+      <div class="bar-track"><div class="bar-fill" id="m-btc-bar"></div></div>
+      <div class="hint" id="m-btc-hint">waiting for data…</div>
     </div>
-    <div class="card">
-      <div class="lbl">Open Positions</div>
-      <div class="val blue" id="s-open">0</div>
-      <div class="sub">max 3</div>
-    </div>
-    <div class="card">
-      <div class="lbl">Trades Today</div>
-      <div class="val yellow" id="s-trades">0</div>
-      <div class="sub">max 40 / day</div>
-    </div>
-    <div class="card">
-      <div class="lbl">Win Rate</div>
-      <div class="val" id="s-winrate" style="color:#9099B5">—</div>
-      <div class="sub">closed trades</div>
-    </div>
-    <div class="card">
-      <div class="lbl">Balance</div>
-      <div class="val blue" id="s-balance">—</div>
-      <div class="sub">Kalshi account</div>
-    </div>
-    <div class="card">
-      <div class="lbl">Last Updated</div>
-      <div class="val" id="s-updated" style="font-size:14px;color:#9099B5">—</div>
-      <div class="sub" id="s-age">—</div>
+    <div class="mom-card">
+      <div class="asset">ETH</div>
+      <div class="pct dim" id="m-eth">0.000%</div>
+      <div class="bar-track"><div class="bar-fill" id="m-eth-bar"></div></div>
+      <div class="hint" id="m-eth-hint">waiting for data…</div>
     </div>
   </div>
+</div>
 
-  <!-- BOT PARAMETERS -->
-  <div class="sec">
-    <div class="sec-hdr"><span class="sec-ttl">Bot Parameters</span><span class="tag neutral">CONFIG</span></div>
-    <div class="param-grid">
-      <div class="param"><div class="pk">Mode</div><div class="pv" id="p-mode">PAPER</div></div>
-      <div class="param"><div class="pk">Trade Size</div><div class="pv">$10 / trade</div></div>
-      <div class="param"><div class="pk">Take Profit</div><div class="pv green">+5¢</div></div>
-      <div class="param"><div class="pk">Stop Loss</div><div class="pv red">−4¢</div></div>
-      <div class="param"><div class="pk">Timeout</div><div class="pv">90s</div></div>
-      <div class="param"><div class="pk">Momentum Window</div><div class="pv">45s</div></div>
-      <div class="param"><div class="pk">Min Momentum</div><div class="pv">0.20%</div></div>
-      <div class="param"><div class="pk">Min Edge</div><div class="pv">5¢</div></div>
-      <div class="param"><div class="pk">Max Open</div><div class="pv">3</div></div>
-      <div class="param"><div class="pk">Max Daily</div><div class="pv">40</div></div>
-      <div class="param"><div class="pk">Cooldown</div><div class="pv">30s</div></div>
-      <div class="param"><div class="pk">Markets</div><div class="pv">BTC · ETH</div></div>
-    </div>
+<!-- Open positions -->
+<div class="section">
+  <h2>Open Positions</h2>
+  <div class="pos-list" id="pos-list">
+    <div style="font-size:12px;color:#4b5563;padding:8px 0">No open positions</div>
   </div>
+</div>
 
-  <!-- MARKETS SCANNING -->
-  <div class="sec">
-    <div class="sec-hdr"><span class="sec-ttl">Markets Scanning</span><span class="tag live" id="mkt-tag">loading…</span></div>
-    <div class="mkt-grid" id="mkt-grid"><div class="empty" style="grid-column:span 2">Fetching markets…</div></div>
-  </div>
-
-  <!-- PRICE + MOMENTUM (Polymarket style) -->
-  <div class="sec">
-    <div class="sec-hdr"><span class="sec-ttl">Live Prices &amp; Momentum</span><span class="tag live">● COINBASE WS</span></div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px">
-      <div id="m-btc-box" style="background:#F8FAFF;border:1px solid #E2E8FF;border-radius:10px;padding:14px 16px;transition:all 0.3s ease">
-        <div style="font-size:10px;font-weight:800;color:#9099B5;margin-bottom:6px;letter-spacing:.8px">BTC / USD</div>
-        <div id="p-btc" style="font-size:22px;font-weight:700;color:#1A1A2E;margin-bottom:10px">—</div>
-        <div style="font-size:10px;font-weight:700;color:#9099B5;text-transform:uppercase;letter-spacing:.6px;margin-bottom:4px">45s Momentum</div>
-        <div style="display:flex;align-items:center;gap:10px">
-          <div id="m-btc" style="font-size:20px;font-weight:900;min-width:70px">0.000%</div>
-          <div style="flex:1">
-            <div style="background:#E2E8FF;border-radius:4px;height:6px;overflow:hidden;margin-bottom:3px">
-              <div id="m-btc-bar" style="height:100%;border-radius:4px;width:0%;background:#9099B5;transition:width .5s,background .5s"></div>
-            </div>
-            <div style="font-size:9px;color:#9099B5;font-weight:700">THRESHOLD: ±0.20% to trigger</div>
-          </div>
-        </div>
-      </div>
-      <div id="m-eth-box" style="background:#F8FAFF;border:1px solid #E2E8FF;border-radius:10px;padding:14px 16px;transition:all 0.3s ease">
-        <div style="font-size:10px;font-weight:800;color:#9099B5;margin-bottom:6px;letter-spacing:.8px">ETH / USD</div>
-        <div id="p-eth" style="font-size:22px;font-weight:700;color:#1A1A2E;margin-bottom:10px">—</div>
-        <div style="font-size:10px;font-weight:700;color:#9099B5;text-transform:uppercase;letter-spacing:.6px;margin-bottom:4px">45s Momentum</div>
-        <div style="display:flex;align-items:center;gap:10px">
-          <div id="m-eth" style="font-size:20px;font-weight:900;min-width:70px">0.000%</div>
-          <div style="flex:1">
-            <div style="background:#E2E8FF;border-radius:4px;height:6px;overflow:hidden;margin-bottom:3px">
-              <div id="m-eth-bar" style="height:100%;border-radius:4px;width:0%;background:#9099B5;transition:width .5s,background .5s"></div>
-            </div>
-            <div style="font-size:9px;color:#9099B5;font-weight:700">THRESHOLD: ±0.20% to trigger</div>
-          </div>
-        </div>
-      </div>
-    </div>
-    <!-- Live price charts -->
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-      <div>
-        <div style="font-size:10px;font-weight:700;color:#9099B5;margin-bottom:6px;text-transform:uppercase;letter-spacing:.6px">BTC Price</div>
-        <div style="position:relative;height:140px"><canvas id="btcChart"></canvas></div>
-      </div>
-      <div>
-        <div style="font-size:10px;font-weight:700;color:#9099B5;margin-bottom:6px;text-transform:uppercase;letter-spacing:.6px">ETH Price</div>
-        <div style="position:relative;height:140px"><canvas id="ethChart"></canvas></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- P&L CHART -->
-  <div class="sec">
-    <div class="sec-hdr">
-      <span class="sec-ttl">Cumulative P&L</span>
-      <span class="tag neutral" id="pnl-tag">$0.00</span>
-    </div>
-    <div style="position:relative;height:200px"><canvas id="pnlChart"></canvas></div>
-    <div class="chart-stats">
-      <div class="cstat"><div class="cl">Total P&L</div><div class="cv" id="cs-total" style="color:#9099B5">—</div></div>
-      <div class="cstat"><div class="cl">Best Trade</div><div class="cv green" id="cs-best">—</div></div>
-      <div class="cstat"><div class="cl">Worst Trade</div><div class="cv red" id="cs-worst">—</div></div>
-      <div class="cstat"><div class="cl">Avg / Trade</div><div class="cv" id="cs-avg" style="color:#9099B5">—</div></div>
-    </div>
-  </div>
-
-  <!-- OPEN POSITIONS -->
-  <div class="sec">
-    <div class="sec-hdr">
-      <span class="sec-ttl">Open Positions</span>
-      <span class="tag neutral" id="open-tag">0 open</span>
-    </div>
-    <div id="open-pos"><div class="empty">No open positions</div></div>
-  </div>
-
-  <!-- TRADE LOG -->
-  <div class="sec">
-    <div class="sec-hdr"><span class="sec-ttl">Trade Log</span><span class="tag neutral" id="trade-count">0 trades</span></div>
+<!-- Trade log -->
+<div class="section" style="padding-bottom:24px">
+  <h2>Trade Log</h2>
+  <div style="background:#161b2e;border:1px solid #252d45;border-radius:10px;overflow:hidden">
     <table>
       <thead>
         <tr>
-          <th>Time</th><th>Event</th><th>Ticker</th><th>Side</th>
-          <th>Price</th><th>Contracts</th><th>P&L</th><th>Note</th>
+          <th>Time</th>
+          <th>Event</th>
+          <th>Ticker</th>
+          <th>Price</th>
+          <th>Qty</th>
+          <th>P&amp;L</th>
+          <th>Note</th>
         </tr>
       </thead>
-      <tbody id="trade-tbl"><tr><td colspan="8" class="empty">No trades yet</td></tr></tbody>
+      <tbody id="trade-tbody">
+        <tr><td colspan="7" style="text-align:center;color:#4b5563;padding:20px">No trades yet</td></tr>
+      </tbody>
     </table>
   </div>
-
-  <div class="footer">
-    <span>Kalshi Latency Arb · KXBTC15M / KXETH15M · Paper Mode</span>
-    <span id="refresh-ts">—</span>
-  </div>
-
 </div>
 
+<div class="footer" id="footer-ts">Refreshing every 20s via GitHub API</div>
+
 <script>
-// ── Config ────────────────────────────────────────────────────────────────────
-const DEFAULT_URL = 'http://207.154.214.183/state.json';
-const RAW_URL = 'http://207.154.214.183/state.json';
-let STATE_URL = localStorage.getItem('kalshi_state_url') || DEFAULT_URL;
-
-function openSettings() {
-  const url = prompt('Bot state URL:', STATE_URL);
-  if (url === null) return;
-  STATE_URL = url.trim() || DEFAULT_URL;
-  localStorage.setItem('kalshi_state_url', STATE_URL);
-  refresh();
-}
-
-// ── Price history for live charts ─────────────────────────────────────────────
-const priceHistory = { BTC: [], ETH: [] };
-const MAX_PTS = 120;
-
-// ── Charts ────────────────────────────────────────────────────────────────────
-function makeLineChart(id, color) {
-  return new Chart(document.getElementById(id), {
-    type: 'line',
-    data: { datasets: [{ data: [], borderColor: color, backgroundColor: color+'14',
-      fill: true, borderWidth: 2, pointRadius: 0, tension: 0.3 }] },
-    options: { responsive: true, maintainAspectRatio: false, animation: { duration: 300 },
-      plugins: { legend: { display: false }, tooltip: { callbacks: {
-        label: c => ' $' + c.parsed.y.toLocaleString('en-US', {minimumFractionDigits:2})
-      }}},
-      scales: {
-        x: { display: false },
-        y: { grid: { color: '#E2E8FF' }, ticks: { color: '#9099B5', callback: v => '$'+v.toLocaleString() }}
-      }
-    }
-  });
-}
-
-const btcChart = makeLineChart('btcChart', '#F7931A');
-const ethChart = makeLineChart('ethChart', '#627EEA');
-
-const pnlChart = new Chart(document.getElementById('pnlChart'), {
-  type: 'line',
-  data: { datasets: [
-    { label: 'P&L', data: [], borderColor: '#22C55E', backgroundColor: 'rgba(34,197,94,.08)',
-      fill: true, borderWidth: 2, pointRadius: 5, pointBackgroundColor: [], tension: 0.4 },
-    { label: 'Zero', data: [], borderColor: 'rgba(100,116,139,.3)', borderDash: [4,4],
-      borderWidth: 1, pointRadius: 0, fill: false }
-  ]},
-  options: { responsive: true, maintainAspectRatio: false, animation: { duration: 600, easing: 'easeInOutQuart' },
-    plugins: { legend: { display: false }, tooltip: { callbacks: {
-      label: c => ' P&L: $' + c.parsed.y.toFixed(2),
-      title: items => 'Trade #' + (items[0].dataIndex + 1)
-    }}},
-    scales: {
-      x: { display: false },
-      y: { grid: { color: '#E2E8FF' }, ticks: { color: '#9099B5', callback: v => '$'+v.toFixed(2) }}
-    }
-  }
-});
-
-// ── Helpers ───────────────────────────────────────────────────────────────────
-function pnlColor(v) { return v > 0 ? '#16A34A' : v < 0 ? '#DC2626' : '#9099B5'; }
-function fmt(v) { if (v == null) return '—'; return (v >= 0 ? '+$' : '-$') + Math.abs(v).toFixed(2); }
-function evClass(e) { return e.includes('TP') ? 'ev-tp' : e.includes('SL') ? 'ev-sl' : e.includes('TM')||e.includes('TIMEOUT') ? 'ev-tm' : e.includes('ENTRY') ? 'ev-entry' : 'ev-mc'; }
-
-function updatePriceChart(chart, asset, price) {
-  const hist = priceHistory[asset];
-  hist.push({ x: hist.length, y: price });
-  if (hist.length > MAX_PTS) hist.shift();
-  chart.data.datasets[0].data = hist.map((p,i) => ({ x: i, y: p.y }));
-  chart.update('none');
-}
-
-function updatePnlChart(trades) {
-  const closed = trades.filter(t => t.pnl != null && !t.event?.includes('ENTRY'));
-  if (!closed.length) return;
-  let cum = 0;
-  const cumData = [], colors = [];
-  closed.forEach(t => { cum = parseFloat((cum + t.pnl).toFixed(6)); cumData.push(cum); colors.push(pnlColor(t.pnl)); });
-  const final = cumData[cumData.length - 1];
-  const lc = final >= 0 ? '#22C55E' : '#EF4444';
-  pnlChart.data.datasets[0].borderColor = lc;
-  pnlChart.data.datasets[0].backgroundColor = final >= 0 ? 'rgba(34,197,94,.07)' : 'rgba(239,68,68,.07)';
-  pnlChart.data.datasets[0].data = cumData;
-  pnlChart.data.datasets[0].pointBackgroundColor = colors;
-  pnlChart.data.datasets[1].data = cumData.map(() => 0);
-  pnlChart.update();
-
-  const pnls = closed.map(t => t.pnl);
-  const best = Math.max(...pnls), worst = Math.min(...pnls), avg = pnls.reduce((a,b)=>a+b,0)/pnls.length;
-  const setCs = (id, v) => { const el = document.getElementById(id); if(el){el.textContent=fmt(v); el.style.color=pnlColor(v);} };
-  setCs('cs-total', final); setCs('cs-best', best); setCs('cs-worst', worst); setCs('cs-avg', avg);
-  const tag = document.getElementById('pnl-tag');
-  tag.textContent = fmt(final); tag.style.color = pnlColor(final);
-  tag.style.background = final >= 0 ? '#ECFDF5' : '#FEF2F2';
-}
-
-// ── Coinbase WebSocket for live price charts ──────────────────────────────────
-let ws = null;
-function connectCoinbase() {
-  ws = new WebSocket('wss://ws-feed.exchange.coinbase.com');
-  ws.onopen = () => ws.send(JSON.stringify({ type:'subscribe', product_ids:['BTC-USD','ETH-USD'], channels:['ticker'] }));
-  ws.onmessage = e => {
-    const d = JSON.parse(e.data);
-    if (d.type !== 'ticker') return;
-    const price = parseFloat(d.price);
-    if (d.product_id === 'BTC-USD') updatePriceChart(btcChart, 'BTC', price);
-    if (d.product_id === 'ETH-USD') updatePriceChart(ethChart, 'ETH', price);
-  };
-  ws.onclose = () => setTimeout(connectCoinbase, 5000);
-  ws.onerror = () => ws.close();
-}
-
-// ── Market scanner ────────────────────────────────────────────────────────────
-async function pollMarkets() {
-  const series = [
-    {id:'KXBTC15M', label:'BTC', cls:'btc', color:'#F7931A'},
-    {id:'KXETH15M', label:'ETH', cls:'eth', color:'#627EEA'}
-  ];
-  let cards = [], live = 0;
-  for (const s of series) {
-    try {
-      const r = await fetch(`https://api.elections.kalshi.com/trade-api/v2/markets?series_ticker=${s.id}&status=open&limit=5`);
-      if (!r.ok) { cards.push(betweenCard(s)); continue; }
-      const d = await r.json();
-      const m = (d.markets||[])[0];
-      if (!m) { cards.push(betweenCard(s)); continue; }
-      live++;
-      const ya=m.yes_ask||0, yb=m.yes_bid||0, na=m.no_ask||(100-yb), nb=m.no_bid||0;
-      const floor=parseFloat(m.floor_strike||0);
-      const close=new Date(m.close_time);
-      const rem=Math.max(0,Math.floor((close-Date.now())/1000));
-      const mm=Math.floor(rem/60), ss=String(rem%60).padStart(2,'0');
-      cards.push(`<div class="mkt-card ${s.cls}">
-        <div class="mkt-asset" style="color:${s.color}">${s.label} · 15-MIN CLOB</div>
-        <div class="mkt-ticker">${m.ticker}</div>
-        <div class="mkt-row">
-          <div class="mkt-prices">
-            <span class="mkt-yes">YES ${ya}¢ / ${yb}¢</span>
-            <span style="color:#CBD5E1;font-size:11px">|</span>
-            <span class="mkt-no">NO ${na}¢ / ${nb}¢</span>
-          </div>
-          <span class="mkt-timer">⏱ ${mm}m ${ss}s</span>
-        </div>
-        <div class="mkt-floor">Floor Strike: $${floor.toLocaleString('en-US',{minimumFractionDigits:2})}</div>
-        <div class="yes-bar"><div class="yes-fill" style="width:${ya}%"></div></div>
-      </div>`);
-    } catch(e) { cards.push(betweenCard(s)); }
-  }
-  document.getElementById('mkt-grid').innerHTML = cards.join('') || '<div class="empty" style="grid-column:span 2">No markets</div>';
-  document.getElementById('mkt-tag').textContent = live + ' live window' + (live!==1?'s':'');
-}
-
-function betweenCard(s) {
-  return `<div class="mkt-card ${s.cls}">
-    <div class="mkt-asset" style="color:${s.color}">${s.label} · 15-MIN CLOB</div>
-    <div class="mkt-ticker" style="color:#9099B5">⏳ Between windows</div>
-    <div class="mkt-floor" style="margin-top:8px">Next window opens shortly</div>
-  </div>`;
-}
-
-// ── Momentum display ─────────────────────────────────────────────────────────
+const GITHUB_API = 'https://api.github.com/repos/mdaleyy99/kalshi-monitor/contents/state.json';
+const STALE_SEC = 90; // show offline if state older than this
 const THRESHOLD = 0.20;
-function setMomentum(asset, pct) {
-  const el  = document.getElementById('m-' + asset);
-  const bar = document.getElementById('m-' + asset + '-bar');
-  const box = document.getElementById('m-' + asset + '-box');
-  const abs = Math.abs(pct);
-  const triggered = abs >= THRESHOLD;
-  const color = pct > 0 ? '#16A34A' : pct < 0 ? '#DC2626' : '#9099B5';
-  const bgColor = pct > 0 ? '#ECFDF5' : pct < 0 ? '#FEF2F2' : '#F8FAFF';
-  el.textContent = (pct >= 0 ? '+' : '') + pct.toFixed(3) + '%';
-  el.style.color = triggered ? color : '#9099B5';
-  el.style.fontWeight = '900';
-  el.style.fontSize = triggered ? '24px' : '20px';
-  el.style.textShadow = triggered ? '0 0 20px ' + color + '88' : 'none';
-  el.style.transition = 'all 0.3s ease';
-  // Box highlight when triggered
-  if (box) {
-    box.style.background = triggered ? bgColor : '#F8FAFF';
-    box.style.borderColor = triggered ? color : '#E2E8FF';
-    box.style.boxShadow = triggered ? '0 0 12px ' + color + '33' : 'none';
-    box.style.transition = 'all 0.3s ease';
+
+function fmt$(v){ return v == null ? '—' : (v>=0?'+':'')+v.toFixed(2) }
+function fmtTime(ts){ return new Date(ts*1000).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit',second:'2-digit'}) }
+
+function setMom(id, barId, hintId, val){
+  const el = document.getElementById(id);
+  const bar = document.getElementById(barId);
+  const hint = document.getElementById(hintId);
+  const abs = Math.abs(val);
+  const pct = val.toFixed(3);
+  const sign = val > 0 ? '+' : '';
+  el.textContent = sign + pct + '%';
+  const color = abs >= THRESHOLD ? (val > 0 ? '#4ade80' : '#f87171') : '#6b7280';
+  el.style.color = color;
+  const barW = Math.min(100, (abs / (THRESHOLD * 2)) * 100);
+  bar.style.width = barW + '%';
+  bar.style.background = color;
+  if(abs >= THRESHOLD){
+    hint.textContent = '🔥 ABOVE THRESHOLD — trade signal!';
+    hint.style.color = color;
+  } else {
+    const need = (THRESHOLD - abs).toFixed(3);
+    hint.textContent = `needs +${need}% more to trigger`;
+    hint.style.color = '#4b5563';
   }
-  // Bar fills proportionally; 0.20% = 50%, 0.40% = 100%
-  const barPct = Math.min(100, (abs / (THRESHOLD * 2)) * 100);
-  bar.style.width = barPct + '%';
-  bar.style.background = triggered ? color : '#CBD5E1';
 }
 
-// ── Main state refresh ────────────────────────────────────────────────────────
-async function refresh() {
+function badgeClass(ev){
+  ev = ev.toUpperCase();
+  if(ev.includes('ENTRY')) return 'badge-entry';
+  if(ev.includes('TP')) return 'badge-tp';
+  if(ev.includes('SL')) return 'badge-sl';
+  if(ev.includes('TIMEOUT')) return 'badge-timeout';
+  return 'badge-other';
+}
+
+function render(d){
+  const now = Date.now()/1000;
+  const age = Math.round(now - d.ts);
+  const alive = d.ts && age < STALE_SEC;
+
+  // Status dot
+  document.getElementById('status-dot').style.background = alive ? '#4ade80' : '#ef4444';
+  document.getElementById('status-text').textContent = alive ? `Online · ${age}s ago` : 'OFFLINE';
+  document.getElementById('status-text').style.color = alive ? '#4ade80' : '#ef4444';
+  document.getElementById('offline-bar').style.display = alive ? 'none' : 'block';
+
+  // Prices
+  if(d.btc) document.getElementById('c-btc').textContent = '$' + Number(d.btc).toLocaleString(undefined,{maximumFractionDigits:0});
+  if(d.eth) document.getElementById('c-eth').textContent = '$' + Number(d.eth).toLocaleString(undefined,{maximumFractionDigits:0});
+
+  // P&L + trades
+  const pnl = d.daily_pnl ?? 0;
+  const pnlEl = document.getElementById('c-pnl');
+  pnlEl.textContent = (pnl >= 0 ? '+' : '') + '$' + pnl.toFixed(2);
+  pnlEl.className = 'val ' + (pnl > 0 ? 'green' : pnl < 0 ? 'red' : 'dim');
+  document.getElementById('c-trades').textContent = (d.daily_trades ?? 0) + ' trades today';
+
+  // Win rate
+  const trades = d.trades ?? [];
+  const exits = trades.filter(t => t.pnl != null);
+  const wins = exits.filter(t => t.pnl > 0).length;
+  const losses = exits.filter(t => t.pnl <= 0).length;
+  const wr = exits.length ? Math.round(wins/exits.length*100) : null;
+  const wrEl = document.getElementById('c-wr');
+  wrEl.textContent = wr != null ? wr + '%' : '—';
+  wrEl.className = 'val ' + (wr >= 50 ? 'green' : wr != null ? 'red' : 'dim');
+  document.getElementById('c-wl').textContent = wins + 'W / ' + losses + 'L';
+
+  // Open positions
+  const open = d.open_positions ?? [];
+  document.getElementById('c-open').textContent = open.length;
+  const posList = document.getElementById('pos-list');
+  if(open.length === 0){
+    posList.innerHTML = '<div style="font-size:12px;color:#4b5563;padding:8px 0">No open positions</div>';
+  } else {
+    posList.innerHTML = open.map(p => `
+      <div class="pos-item">
+        <div>
+          <div class="ticker">${p.ticker||p.market_id||'?'}</div>
+          <div class="meta">Entry: ${p.entry_price ?? p.price ?? '?'}¢ · ${p.contracts ?? p.qty ?? '?'} contracts · ${p.side||'?'}</div>
+        </div>
+        <div class="price" style="color:#60a5fa">${p.entry_price ?? p.price ?? '?'}¢</div>
+      </div>`).join('');
+  }
+
+  // Momentum
+  if(d.btc_mom != null) setMom('m-btc','m-btc-bar','m-btc-hint', d.btc_mom);
+  if(d.eth_mom != null) setMom('m-eth','m-eth-bar','m-eth-hint', d.eth_mom);
+
+  // Trade log (newest first)
+  const tbody = document.getElementById('trade-tbody');
+  const sorted = [...trades].reverse();
+  if(sorted.length === 0){
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#4b5563;padding:20px">No trades yet</td></tr>';
+  } else {
+    tbody.innerHTML = sorted.map(t => {
+      const pnlStr = t.pnl != null ? `<span class="${t.pnl>0?'green':'red'}">${fmt$(t.pnl)}</span>` : '<span class="dim">—</span>';
+      const bc = badgeClass(t.event||'');
+      return `<tr>
+        <td>${t.ts ? fmtTime(t.ts) : '—'}</td>
+        <td><span class="badge ${bc}">${t.event||'?'}</span></td>
+        <td style="font-size:11px;max-width:200px;word-break:break-all">${t.ticker||'?'}</td>
+        <td>${t.price != null ? t.price+'¢' : '—'}</td>
+        <td>${t.contracts ?? '—'}</td>
+        <td>${pnlStr}</td>
+        <td style="font-size:10px;color:#4b5563;max-width:180px">${t.note||''}</td>
+      </tr>`;
+    }).join('');
+  }
+}
+
+async function fetchState(){
   try {
-    // Try raw URL (no rate limit) with cache-bust, fall back to API
-    let d;
-    try {
-      const r = await fetch(RAW_URL + '?t=' + Date.now(), { cache: 'no-store' });
-      if (!r.ok) throw new Error(r.status);
-      d = await r.json();
-    } catch(e2) {
-      const raw = await fetch(STATE_URL, { cache: 'no-store' }).then(r => { if (!r.ok) throw new Error(r.status); return r.json(); });
-      d = raw.content ? JSON.parse(atob(raw.content.replace(/\n/g,''))) : raw;
-    }
-
-    const age = Math.round(Date.now()/1000 - d.ts);
-    const alive = d.ts && age < 60;
-    document.getElementById('dot').className = 'dot' + (alive ? '' : ' off');
-    document.getElementById('status').textContent = alive ? 'Online · ' + age + 's ago' : 'OFFLINE';
-    document.getElementById('offline-banner').style.display = alive ? 'none' : 'block';
-    if (!alive) document.getElementById('last-seen').textContent = new Date(d.ts*1000).toLocaleTimeString();
-
-    const mode = d.mode || 'PAPER';
-    document.getElementById('mode-badge').textContent = mode;
-    document.getElementById('nav-mode').textContent = mode;
-    document.getElementById('p-mode').textContent = mode;
-    document.getElementById('p-mode').style.color = mode === 'LIVE' ? '#DC2626' : '#D97706';
-
-    // Stats
-    const pnl = d.daily_pnl || 0;
-    const pnlEl = document.getElementById('s-pnl');
-    pnlEl.textContent = (pnl >= 0 ? '+$' : '-$') + Math.abs(pnl).toFixed(2);
-    pnlEl.style.color = pnlColor(pnl);
-    const pnlPctEl = document.getElementById('s-pnl-pct');
-    if (pnlPctEl && d.balance) {
-      const pct = (pnl / d.balance) * 100;
-      pnlPctEl.textContent = (pct >= 0 ? '+' : '') + pct.toFixed(2) + '%';
-      pnlPctEl.style.color = pnlColor(pnl);
-    }
-
-    const closed = (d.trades||[]).filter(t => t.pnl != null);
-    const wins = closed.filter(t => t.pnl > 0);
-    const wr = closed.length ? wins.length / closed.length : null;
-    document.getElementById('s-wr').textContent = wr != null ? `Win rate: ${(wr*100).toFixed(0)}% (${wins.length}/${closed.length})` : 'No trades yet';
-    document.getElementById('s-winrate').textContent = wr != null ? (wr*100).toFixed(0)+'%' : '—';
-    document.getElementById('s-winrate').style.color = wr != null ? pnlColor(wr-0.5) : '#9099B5';
-    document.getElementById('s-open').textContent = (d.open_positions||[]).length;
-    document.getElementById('s-trades').textContent = d.daily_trades || 0;
-    document.getElementById('s-balance').textContent = d.balance != null ? '$'+d.balance.toFixed(2) : '—';
-    document.getElementById('s-updated').textContent = d.ts ? new Date(d.ts*1000).toLocaleTimeString() : '—';
-    document.getElementById('s-age').textContent = age + 's ago';
-    document.getElementById('open-tag').textContent = (d.open_positions||[]).length + ' open';
-
-    // Price displays (from state — live charts update via WS)
-    if (d.btc) {
-      document.getElementById('p-btc').textContent = '$'+d.btc.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
-      setMomentum('btc', d.btc_mom||0);
-    }
-    if (d.eth) {
-      document.getElementById('p-eth').textContent = '$'+d.eth.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
-      setMomentum('eth', d.eth_mom||0);
-    }
-
-    // Open positions
-    const ops = d.open_positions || [];
-    document.getElementById('open-pos').innerHTML = ops.length
-      ? ops.map(p => {
-          const held = Math.floor(Date.now()/1000 - p.open_time);
-          return `<div class="pos-row">
-            <div class="pos-left">
-              <div class="pq">${p.ticker}</div>
-              <div class="pm">Floor $${parseFloat(p.floor_strike||0).toLocaleString()} · ${p.contracts} contracts · Open ${Math.floor(held/60)}m ${held%60}s</div>
-            </div>
-            <div class="pos-right">
-              <span class="badge ${p.side}">${(p.side||'').toUpperCase()}</span>
-              <span class="badge asset">${p.entry_ask}¢ entry</span>
-            </div>
-          </div>`;
-        }).join('')
-      : '<div class="empty">No open positions</div>';
-
-    // Trade log
-    const trades = d.trades || [];
-    document.getElementById('trade-count').textContent = trades.length + ' trades';
-    document.getElementById('trade-tbl').innerHTML = trades.length
-      ? [...trades].reverse().slice(0,100).map(t => {
-          const time = t.ts ? new Date(t.ts*1000).toLocaleTimeString() : '—';
-          const pnlStr = t.pnl != null ? `<span class="${t.pnl>0?'tg':t.pnl<0?'tr':''}">${fmt(t.pnl)}</span>` : '<span style="color:#9099B5">—</span>';
-          return `<tr>
-            <td style="color:#9099B5;font-size:11px">${time}</td>
-            <td><span class="${evClass(t.event||'')}">${t.event||'—'}</span></td>
-            <td class="tb">${t.ticker||'—'}</td>
-            <td><span class="badge ${t.side||''}" style="font-size:10px">${(t.side||'—').toUpperCase()}</span></td>
-            <td>${t.price||'—'}¢</td>
-            <td style="color:#9099B5">${t.contracts||'—'}</td>
-            <td>${pnlStr}</td>
-            <td style="color:#9099B5;font-size:11px;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${t.note||'—'}</td>
-          </tr>`;
-        }).join('')
-      : '<tr><td colspan="8" class="empty">No trades yet</td></tr>';
-
-    updatePnlChart(trades);
-    document.getElementById('refresh-ts').textContent = 'Updated: ' + new Date().toLocaleTimeString();
+    const r = await fetch(GITHUB_API + '?t=' + Date.now(), {
+      headers: {Accept: 'application/vnd.github.v3+json'}
+    });
+    if(!r.ok) throw new Error('HTTP ' + r.status);
+    const j = await r.json();
+    const raw = atob(j.content.replace(/\n/g,''));
+    const d = JSON.parse(raw);
+    render(d);
+    document.getElementById('last-fetch').textContent = '· fetched ' + new Date().toLocaleTimeString();
+    document.getElementById('footer-ts').textContent = 'Last fetch: ' + new Date().toLocaleString() + ' · refreshes every 20s';
   } catch(e) {
-    document.getElementById('dot').className = 'dot off';
-    document.getElementById('status').textContent = 'Offline';
-    document.getElementById('offline-banner').style.display = 'block';
-    document.getElementById('last-seen').textContent = '—';
-    console.error('Refresh error:', e);
+    document.getElementById('status-dot').style.background = '#ef4444';
+    document.getElementById('status-text').textContent = 'Fetch error: ' + e.message;
+    document.getElementById('status-text').style.color = '#ef4444';
+    document.getElementById('offline-bar').style.display = 'block';
+    document.getElementById('offline-bar').textContent = '⚠️ Could not fetch state: ' + e.message;
   }
 }
 
-// ── Boot ──────────────────────────────────────────────────────────────────────
-connectCoinbase();
-refresh();
-pollMarkets();
-setInterval(refresh, 30000);       // GitHub API rate limit — 15s is safe
-setInterval(pollMarkets, 15000);
+// Check if btc_mom is in % or decimal and normalize
+const _origRender = render;
+
+fetchState();
+setInterval(fetchState, 20000);
 </script>
 </body>
 </html>
