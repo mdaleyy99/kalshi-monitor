@@ -23,7 +23,7 @@ body{background:#F0F4FF;font-family:-apple-system,BlinkMacSystemFont,'SF Pro',sa
 
 /* STAT CARDS */
 .cards{display:grid;grid-template-columns:repeat(6,1fr);gap:12px;margin-bottom:20px}
-.card{background:#fff;border-radius:12px;padding:18px 20px;border:1px solid #E2E8FF;box-shadow:0 1px 4px rgba(0,0,0,.06)}
+.card{background:#fff;border-radius:12px;padding:18px 20px;border:1px solid #E2E8FF;box-shadow:0 1px 4px rgba(0,0,0,.06);transition:transform .15s,box-shadow .15s}.card:hover{transform:translateY(-2px);box-shadow:0 4px 12px rgba(0,0,0,.1)}
 .card .lbl{font-size:10px;color:#9099B5;font-weight:700;letter-spacing:.8px;text-transform:uppercase;margin-bottom:10px}
 .card .val{font-size:28px;font-weight:800;line-height:1;color:#1A1A2E}
 .card .sub{font-size:11px;color:#9099B5;margin-top:6px}
@@ -116,7 +116,10 @@ tr:hover td{background:#F8FAFF}
   <div class="cards">
     <div class="card">
       <div class="lbl">Daily P&L</div>
-      <div class="pnl-big" id="s-pnl" style="color:#9099B5">$0.00</div>
+      <div style="display:flex;align-items:baseline;gap:10px">
+        <div class="pnl-big" id="s-pnl" style="color:#9099B5">$0.00</div>
+        <div id="s-pnl-pct" style="font-size:16px;font-weight:800;color:#9099B5">0.00%</div>
+      </div>
       <div class="sub" id="s-wr">No trades yet</div>
     </div>
     <div class="card">
@@ -175,7 +178,7 @@ tr:hover td{background:#F8FAFF}
   <div class="sec">
     <div class="sec-hdr"><span class="sec-ttl">Live Prices &amp; Momentum</span><span class="tag live">● COINBASE WS</span></div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px">
-      <div style="background:#F8FAFF;border:1px solid #E2E8FF;border-radius:10px;padding:14px 16px">
+      <div id="m-btc-box" style="background:#F8FAFF;border:1px solid #E2E8FF;border-radius:10px;padding:14px 16px;transition:all 0.3s ease">
         <div style="font-size:10px;font-weight:800;color:#9099B5;margin-bottom:6px;letter-spacing:.8px">BTC / USD</div>
         <div id="p-btc" style="font-size:22px;font-weight:700;color:#1A1A2E;margin-bottom:10px">—</div>
         <div style="font-size:10px;font-weight:700;color:#9099B5;text-transform:uppercase;letter-spacing:.6px;margin-bottom:4px">45s Momentum</div>
@@ -189,7 +192,7 @@ tr:hover td{background:#F8FAFF}
           </div>
         </div>
       </div>
-      <div style="background:#F8FAFF;border:1px solid #E2E8FF;border-radius:10px;padding:14px 16px">
+      <div id="m-eth-box" style="background:#F8FAFF;border:1px solid #E2E8FF;border-radius:10px;padding:14px 16px;transition:all 0.3s ease">
         <div style="font-size:10px;font-weight:800;color:#9099B5;margin-bottom:6px;letter-spacing:.8px">ETH / USD</div>
         <div id="p-eth" style="font-size:22px;font-weight:700;color:#1A1A2E;margin-bottom:10px">—</div>
         <div style="font-size:10px;font-weight:700;color:#9099B5;text-transform:uppercase;letter-spacing:.6px;margin-bottom:4px">45s Momentum</div>
@@ -286,7 +289,7 @@ function makeLineChart(id, color) {
     type: 'line',
     data: { datasets: [{ data: [], borderColor: color, backgroundColor: color+'14',
       fill: true, borderWidth: 2, pointRadius: 0, tension: 0.3 }] },
-    options: { responsive: true, maintainAspectRatio: false, animation: false,
+    options: { responsive: true, maintainAspectRatio: false, animation: { duration: 300 },
       plugins: { legend: { display: false }, tooltip: { callbacks: {
         label: c => ' $' + c.parsed.y.toLocaleString('en-US', {minimumFractionDigits:2})
       }}},
@@ -427,12 +430,24 @@ const THRESHOLD = 0.20;
 function setMomentum(asset, pct) {
   const el  = document.getElementById('m-' + asset);
   const bar = document.getElementById('m-' + asset + '-bar');
+  const box = document.getElementById('m-' + asset + '-box');
   const abs = Math.abs(pct);
   const triggered = abs >= THRESHOLD;
   const color = pct > 0 ? '#16A34A' : pct < 0 ? '#DC2626' : '#9099B5';
+  const bgColor = pct > 0 ? '#ECFDF5' : pct < 0 ? '#FEF2F2' : '#F8FAFF';
   el.textContent = (pct >= 0 ? '+' : '') + pct.toFixed(3) + '%';
   el.style.color = triggered ? color : '#9099B5';
-  el.style.fontWeight = triggered ? '900' : '700';
+  el.style.fontWeight = '900';
+  el.style.fontSize = triggered ? '24px' : '20px';
+  el.style.textShadow = triggered ? '0 0 20px ' + color + '88' : 'none';
+  el.style.transition = 'all 0.3s ease';
+  // Box highlight when triggered
+  if (box) {
+    box.style.background = triggered ? bgColor : '#F8FAFF';
+    box.style.borderColor = triggered ? color : '#E2E8FF';
+    box.style.boxShadow = triggered ? '0 0 12px ' + color + '33' : 'none';
+    box.style.transition = 'all 0.3s ease';
+  }
   // Bar fills proportionally; 0.20% = 50%, 0.40% = 100%
   const barPct = Math.min(100, (abs / (THRESHOLD * 2)) * 100);
   bar.style.width = barPct + '%';
@@ -454,9 +469,9 @@ async function refresh() {
     }
 
     const age = Math.round(Date.now()/1000 - d.ts);
-    const alive = d.ts && age < 120;
+    const alive = d.ts && age < 60;
     document.getElementById('dot').className = 'dot' + (alive ? '' : ' off');
-    document.getElementById('status').textContent = alive ? 'Live' : 'Stale';
+    document.getElementById('status').textContent = alive ? 'Online · ' + age + 's ago' : 'OFFLINE';
     document.getElementById('offline-banner').style.display = alive ? 'none' : 'block';
     if (!alive) document.getElementById('last-seen').textContent = new Date(d.ts*1000).toLocaleTimeString();
 
@@ -471,6 +486,12 @@ async function refresh() {
     const pnlEl = document.getElementById('s-pnl');
     pnlEl.textContent = (pnl >= 0 ? '+$' : '-$') + Math.abs(pnl).toFixed(2);
     pnlEl.style.color = pnlColor(pnl);
+    const pnlPctEl = document.getElementById('s-pnl-pct');
+    if (pnlPctEl && d.balance) {
+      const pct = (pnl / d.balance) * 100;
+      pnlPctEl.textContent = (pct >= 0 ? '+' : '') + pct.toFixed(2) + '%';
+      pnlPctEl.style.color = pnlColor(pnl);
+    }
 
     const closed = (d.trades||[]).filter(t => t.pnl != null);
     const wins = closed.filter(t => t.pnl > 0);
