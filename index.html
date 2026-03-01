@@ -265,6 +265,7 @@ tr:hover td{background:#F8FAFF}
 <script>
 // ── Config ────────────────────────────────────────────────────────────────────
 const DEFAULT_URL = 'https://api.github.com/repos/mdaleyy99/kalshi-monitor/contents/state.json';
+const RAW_URL = 'https://raw.githubusercontent.com/mdaleyy99/kalshi-monitor/main/state.json';
 let STATE_URL = localStorage.getItem('kalshi_state_url') || DEFAULT_URL;
 
 function openSettings() {
@@ -441,8 +442,16 @@ function setMomentum(asset, pct) {
 // ── Main state refresh ────────────────────────────────────────────────────────
 async function refresh() {
   try {
-    const raw = await fetch(STATE_URL, { cache: 'no-store' }).then(r => { if (!r.ok) throw new Error(r.status); return r.json(); });
-    const d = raw.content ? JSON.parse(atob(raw.content.replace(/\n/g,''))) : raw;
+    // Try raw URL (no rate limit) with cache-bust, fall back to API
+    let d;
+    try {
+      const r = await fetch(RAW_URL + '?t=' + Date.now(), { cache: 'no-store' });
+      if (!r.ok) throw new Error(r.status);
+      d = await r.json();
+    } catch(e2) {
+      const raw = await fetch(STATE_URL, { cache: 'no-store' }).then(r => { if (!r.ok) throw new Error(r.status); return r.json(); });
+      d = raw.content ? JSON.parse(atob(raw.content.replace(/\n/g,''))) : raw;
+    }
 
     const age = Math.round(Date.now()/1000 - d.ts);
     const alive = d.ts && age < 120;
@@ -539,7 +548,7 @@ async function refresh() {
 connectCoinbase();
 refresh();
 pollMarkets();
-setInterval(refresh, 15000);       // GitHub API rate limit — 15s is safe
+setInterval(refresh, 30000);       // GitHub API rate limit — 15s is safe
 setInterval(pollMarkets, 15000);
 </script>
 </body>
