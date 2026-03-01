@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Kalshi Bot — Trade Report</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0d1117;color:#e1e4f0;min-height:100vh}
+.header{background:#161b2e;border-bottom:1px solid #21293d;padding:16px 28px;display:flex;align-items:center;justify-content:space-between}
+.header h1{font-size:16px;font-weight:800;color:#fff}
+.header .sub{font-size:11px;color:#4b5563;margin-top:3px}
+.badge-paper{background:#422006;color:#fb923c;font-size:10px;font-weight:800;padding:3px 10px;border-radius:20px;letter-spacing:.5px}
+
+.page{max-width:1200px;margin:0 auto;padding:24px 28px;display:flex;flex-direction:column;gap:20px}
+
+.sec{font-size:10px;font-weight:800;letter-spacing:.9px;text-transform:uppercase;color:#374151;margin-bottom:12px}
+
+/* STAT CARDS */
+.kpis{display:grid;grid-template-columns:repeat(6,1fr);gap:12px}
+.kpi{background:#161b2e;border:1px solid #21293d;border-radius:10px;padding:14px 16px}
+.kpi .lbl{font-size:10px;font-weight:700;letter-spacing:.7px;text-transform:uppercase;color:#374151;margin-bottom:8px}
+.kpi .val{font-size:26px;font-weight:900;letter-spacing:-1px}
+.kpi .sub{font-size:11px;color:#374151;margin-top:4px}
+.green{color:#22c55e} .red{color:#ef4444} .amber{color:#f59e0b} .blue{color:#60a5fa} .dim{color:#6b7280}
+
+/* CHARTS */
+.chart-row{display:grid;grid-template-columns:2fr 1fr;gap:16px}
+.chart-box{background:#161b2e;border:1px solid #21293d;border-radius:10px;padding:16px}
+
+/* BREAKDOWN GRID */
+.breakdown{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.bk{background:#161b2e;border:1px solid #21293d;border-radius:10px;padding:14px}
+.bk .bk-title{font-size:11px;font-weight:700;color:#e1e4f0;margin-bottom:12px}
+.bk-row{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid #1a2035;font-size:12px}
+.bk-row:last-child{border-bottom:none}
+.bk-row .bk-lbl{color:#6b7280}
+.bk-row .bk-val{font-weight:700}
+
+/* TRADE TABLE */
+.tbl-wrap{background:#161b2e;border:1px solid #21293d;border-radius:10px;overflow:hidden}
+table{width:100%;border-collapse:collapse}
+thead th{text-align:left;padding:10px 14px;font-size:9px;font-weight:800;letter-spacing:.8px;text-transform:uppercase;color:#374151;border-bottom:1px solid #21293d;white-space:nowrap}
+tbody tr{border-bottom:1px solid #161f30;transition:background .15s}
+tbody tr:hover{background:#1a2035}
+tbody td{padding:9px 14px;color:#9ca3af;font-size:12px}
+.badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:10px;font-weight:700}
+.b-tp{background:#14532d;color:#4ade80}
+.b-sl{background:#450a0a;color:#f87171}
+.b-timeout{background:#431407;color:#fb923c}
+.b-btc{background:#1c1400;color:#f59e0b}
+.b-eth{background:#1a1a3e;color:#818cf8}
+.b-yes{background:#1e3a5f;color:#60a5fa}
+.b-no{background:#1e1e3f;color:#a78bfa}
+
+.bar-bg{background:#21293d;border-radius:3px;height:5px;margin-top:4px;overflow:hidden}
+.bar-fill{height:100%;border-radius:3px}
+
+footer{text-align:center;font-size:10px;color:#374151;padding:16px 0 32px}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <h1>📊 Kalshi Bot — Trade Report</h1>
+    <div class="sub">Generated: March 1, 2026 · Session: Feb 28–Mar 1 · All times EST</div>
+  </div>
+  <span class="badge-paper">🟡 PAPER TRADING</span>
+</div>
+
+<div class="page">
+
+  <!-- KPIs -->
+  <div>
+    <div class="sec">Performance Summary</div>
+    <div class="kpis">
+      <div class="kpi">
+        <div class="lbl">Total P&L</div>
+        <div class="val green">+$30.39</div>
+        <div class="sub">paper trades</div>
+      </div>
+      <div class="kpi">
+        <div class="lbl">Win Rate</div>
+        <div class="val green">76.9%</div>
+        <div class="sub">10W / 3L</div>
+      </div>
+      <div class="kpi">
+        <div class="lbl">Total Trades</div>
+        <div class="val dim">13</div>
+        <div class="sub">closed positions</div>
+      </div>
+      <div class="kpi">
+        <div class="lbl">Avg Win</div>
+        <div class="val green">+$3.28</div>
+        <div class="sub">per winning trade</div>
+      </div>
+      <div class="kpi">
+        <div class="lbl">Avg Loss</div>
+        <div class="val red">−$0.81</div>
+        <div class="sub">per losing trade</div>
+      </div>
+      <div class="kpi">
+        <div class="lbl">Profit Factor</div>
+        <div class="val amber">12.6×</div>
+        <div class="sub">wins / losses</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CHARTS -->
+  <div class="chart-row">
+    <div class="chart-box">
+      <div class="sec">Cumulative P&L</div>
+      <canvas id="pnl-chart" height="100"></canvas>
+    </div>
+    <div class="chart-box">
+      <div class="sec">Exit Type Distribution</div>
+      <canvas id="exit-chart" height="100"></canvas>
+    </div>
+  </div>
+
+  <!-- BREAKDOWN -->
+  <div>
+    <div class="sec">Breakdown</div>
+    <div class="breakdown">
+
+      <!-- By Asset -->
+      <div class="bk">
+        <div class="bk-title">By Asset</div>
+        <div class="bk-row"><span class="bk-lbl"><span class="badge b-eth">ETH</span></span><span class="bk-val">8 trades · <span class="green">+$19.06</span></span></div>
+        <div class="bk-row"><span class="bk-lbl"><span class="badge b-btc">BTC</span></span><span class="bk-val">5 trades · <span class="green">+$11.50</span></span></div>
+        <div class="bk-row" style="margin-top:10px">
+          <span class="bk-lbl">ETH share</span>
+          <span class="bk-val">62.7%</span>
+        </div>
+        <div class="bar-bg"><div class="bar-fill" style="width:62.7%;background:#818cf8"></div></div>
+        <div class="bk-row" style="margin-top:8px">
+          <span class="bk-lbl">BTC share</span>
+          <span class="bk-val">37.3%</span>
+        </div>
+        <div class="bar-bg"><div class="bar-fill" style="width:37.3%;background:#f59e0b"></div></div>
+      </div>
+
+      <!-- By Side -->
+      <div class="bk">
+        <div class="bk-title">By Direction</div>
+        <div class="bk-row"><span class="bk-lbl"><span class="badge b-no">NO (short)</span></span><span class="bk-val">10 trades · <span class="green">+$16.20</span></span></div>
+        <div class="bk-row"><span class="bk-lbl"><span class="badge b-yes">YES (long)</span></span><span class="bk-val">3 trades · <span class="green">+$21.72</span></span></div>
+        <div class="bk-row" style="margin-top:10px">
+          <span class="bk-lbl">NO trades</span><span class="bk-val">76.9%</span>
+        </div>
+        <div class="bar-bg"><div class="bar-fill" style="width:76.9%;background:#a78bfa"></div></div>
+        <div class="bk-row" style="margin-top:8px">
+          <span class="bk-lbl">YES trades</span><span class="bk-val">23.1%</span>
+        </div>
+        <div class="bar-bg"><div class="bar-fill" style="width:23.1%;background:#60a5fa"></div></div>
+      </div>
+
+      <!-- Edge Stats -->
+      <div class="bk">
+        <div class="bk-title">Edge &amp; Execution</div>
+        <div class="bk-row"><span class="bk-lbl">Avg edge at entry</span><span class="bk-val blue">23.8¢</span></div>
+        <div class="bk-row"><span class="bk-lbl">Min edge</span><span class="bk-val">9.9¢</span></div>
+        <div class="bk-row"><span class="bk-lbl">Max edge</span><span class="bk-val">39.7¢</span></div>
+        <div class="bk-row"><span class="bk-lbl">Avg time in trade</span><span class="bk-val">~18s</span></div>
+        <div class="bk-row"><span class="bk-lbl">Avg contracts/trade</span><span class="bk-val">18.0</span></div>
+        <div class="bk-row"><span class="bk-lbl">Best single trade</span><span class="bk-val green">+$14.52</span></div>
+        <div class="bk-row"><span class="bk-lbl">Worst single trade</span><span class="bk-val red">−$1.40</span></div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- TRADE LOG -->
+  <div>
+    <div class="sec">All Trades</div>
+    <div class="tbl-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Time</th>
+            <th>Asset</th>
+            <th>Side</th>
+            <th>Entry</th>
+            <th>Exit</th>
+            <th>Move</th>
+            <th>Qty</th>
+            <th>Fair</th>
+            <th>Edge</th>
+            <th>Mom %</th>
+            <th>Exit Type</th>
+            <th>P&L</th>
+          </tr>
+        </thead>
+        <tbody id="trade-rows"></tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<footer>Kalshi Paper Bot · All figures paper/simulated · Percy 🦞</footer>
+
+<script>
+const trades = [
+  {ts:"2026-02-28 22:53:58",asset:"ETH",side:"no", entry:85,exit:93, qty:11,fair:98,edge:13.0,mom:-0.20,type:"TP",  pnl:0.88},
+  {ts:"2026-02-28 22:54:03",asset:"BTC",side:"no", entry:45,exit:54, qty:22,fair:81,edge:36.3,mom:-0.20,type:"TP",  pnl:1.98},
+  {ts:"2026-02-28 23:02:09",asset:"ETH",side:"yes",entry:77,exit:72, qty:12,fair:96,edge:18.5,mom:+0.20,type:"SL",  pnl:-0.60},
+  {ts:"2026-02-28 23:07:03",asset:"ETH",side:"no", entry:35,exit:30, qty:28,fair:66,edge:30.6,mom:-0.21,type:"SL",  pnl:-1.40},
+  {ts:"2026-02-28 23:07:37",asset:"ETH",side:"no", entry:61,exit:66, qty:16,fair:71,edge:9.9, mom:-0.24,type:"TP",  pnl:0.80},
+  {ts:"2026-02-28 23:16:11",asset:"ETH",side:"no", entry:63,exit:68, qty:15,fair:88,edge:24.9,mom:-0.20,type:"TP",  pnl:0.75},
+  {ts:"2026-02-28 23:16:12",asset:"BTC",side:"no", entry:62,exit:73, qty:16,fair:80,edge:17.8,mom:-0.20,type:"TP",  pnl:1.76},
+  {ts:"2026-02-28 23:16:44",asset:"ETH",side:"no", entry:81,exit:87, qty:12,fair:98,edge:17.0,mom:-0.58,type:"TP",  pnl:0.72},
+  {ts:"2026-02-28 23:16:46",asset:"BTC",side:"no", entry:75,exit:87, qty:13,fair:94,edge:18.9,mom:-0.20,type:"TP",  pnl:1.56},
+  {ts:"2026-02-28 23:17:16",asset:"ETH",side:"no", entry:87,exit:83, qty:11,fair:98,edge:11.0,mom:-0.21,type:"SL",  pnl:-0.44},
+  {ts:"2026-02-28 23:40:52",asset:"BTC",side:"yes",entry:48,exit:84, qty:20,fair:84,edge:35.8,mom:+0.20,type:"TP",  pnl:7.20},
+  {ts:"2026-03-01 00:08:29",asset:"ETH",side:"no", entry:66,exit:87, qty:15,fair:98,edge:32.0,mom:-0.20,type:"TP",  pnl:3.15},
+  {ts:"2026-03-01 00:10:03",asset:"ETH",side:"yes",entry:30,exit:74, qty:33,fair:70,edge:39.7,mom:+0.20,type:"TP",  pnl:14.52},
+];
+
+// Build trade table
+const tbody = document.getElementById('trade-rows');
+let cum = 0;
+tbody.innerHTML = trades.map((t,i) => {
+  cum += t.pnl;
+  const move = t.exit - t.entry;
+  const moveStr = (move >= 0 ? '+' : '') + move + '¢';
+  const moveColor = move > 0 ? '#22c55e' : '#ef4444';
+  const pnlStr = (t.pnl >= 0 ? '+' : '') + '$' + t.pnl.toFixed(2);
+  const pnlColor = t.pnl > 0 ? '#22c55e' : '#ef4444';
+  const cumStr = (cum >= 0 ? '+' : '') + '$' + cum.toFixed(2);
+  const typeBadge = t.type === 'TP' ? 'b-tp' : t.type === 'SL' ? 'b-sl' : 'b-timeout';
+  const assetBadge = t.asset === 'BTC' ? 'b-btc' : 'b-eth';
+  const sideBadge = t.side === 'yes' ? 'b-yes' : 'b-no';
+  const momColor = Math.abs(t.mom) >= 0.20 ? (t.mom > 0 ? '#22c55e' : '#ef4444') : '#6b7280';
+  const time = t.ts.split(' ')[1];
+  return `<tr>
+    <td style="color:#374151;font-weight:700">${i+1}</td>
+    <td style="font-variant-numeric:tabular-nums;color:#6b7280">${time}</td>
+    <td><span class="badge ${assetBadge}">${t.asset}</span></td>
+    <td><span class="badge ${sideBadge}">${t.side.toUpperCase()}</span></td>
+    <td style="font-weight:700;color:#e1e4f0">${t.entry}¢</td>
+    <td style="font-weight:700;color:#e1e4f0">${t.exit}¢</td>
+    <td style="font-weight:700;color:${moveColor}">${moveStr}</td>
+    <td>${t.qty}</td>
+    <td style="color:#4b5563">${t.fair}¢</td>
+    <td style="color:#60a5fa;font-weight:600">${t.edge}¢</td>
+    <td style="color:${momColor};font-weight:700">${(t.mom >= 0 ? '+' : '') + t.mom.toFixed(2)}%</td>
+    <td><span class="badge ${typeBadge}">${t.type}</span></td>
+    <td style="font-weight:800;color:${pnlColor}">${pnlStr} <span style="font-size:10px;color:#374151">(${cumStr})</span></td>
+  </tr>`;
+}).join('');
+
+// Cumulative P&L chart
+let running = 0;
+const pnlLabels = trades.map((t,i) => '#'+(i+1));
+const pnlData = trades.map(t => { running += t.pnl; return parseFloat(running.toFixed(2)); });
+const pointColors = trades.map(t => t.pnl > 0 ? '#22c55e' : '#ef4444');
+
+new Chart(document.getElementById('pnl-chart'), {
+  type: 'line',
+  data: {
+    labels: pnlLabels,
+    datasets: [{
+      label: 'Cumulative P&L',
+      data: pnlData,
+      borderColor: '#22c55e',
+      backgroundColor: '#22c55e12',
+      borderWidth: 2.5,
+      pointRadius: 5,
+      pointBackgroundColor: pointColors,
+      pointBorderColor: pointColors,
+      tension: 0.3,
+      fill: true
+    }]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: true,
+    plugins: {
+      legend: { display: false },
+      tooltip: { callbacks: { label: ctx => ' $' + ctx.parsed.y.toFixed(2) } }
+    },
+    scales: {
+      x: { grid: { color: '#21293d' }, ticks: { color: '#374151', font: { size: 10 } } },
+      y: { grid: { color: '#21293d' }, ticks: { color: '#374151', font: { size: 10 }, callback: v => '$' + v.toFixed(2) } }
+    }
+  }
+});
+
+// Exit type donut
+new Chart(document.getElementById('exit-chart'), {
+  type: 'doughnut',
+  data: {
+    labels: ['Take Profit', 'Stop Loss', 'Timeout'],
+    datasets: [{
+      data: [10, 3, 0],
+      backgroundColor: ['#22c55e', '#ef4444', '#f59e0b'],
+      borderColor: '#161b2e',
+      borderWidth: 3,
+      hoverOffset: 6
+    }]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: true,
+    cutout: '68%',
+    plugins: {
+      legend: {
+        position: 'bottom',
+        labels: { color: '#6b7280', font: { size: 11 }, padding: 14, boxWidth: 12 }
+      },
+      tooltip: { callbacks: { label: ctx => ' ' + ctx.label + ': ' + ctx.parsed + ' trades' } }
+    }
+  }
+});
+</script>
+</body>
+</html>
