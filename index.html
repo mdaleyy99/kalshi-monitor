@@ -143,7 +143,7 @@ tbody td{padding:8px 12px;color:#9ca3af;font-size:12px}
   <div class="params">
     <div class="sec-lbl">Bot Parameters</div>
     <div class="pgrid">
-      <div class="param"><div class="pk">Mode</div><div class="pv" style="color:#ef4444">🔴 LIVE</div></div>
+      <div class="param"><div class="pk">Mode</div><div class="pv" id="p-mode" style="color:#ef4444">🔴 LIVE</div></div>
       <div class="param"><div class="pk">Trade Size</div><div class="pv">$10</div></div>
       <div class="param"><div class="pk">Take Profit</div><div class="pv green">+5¢</div></div>
       <div class="param"><div class="pk">Stop Loss</div><div class="pv red">−4¢</div></div>
@@ -468,6 +468,9 @@ function renderState(d) {
   modeEl.textContent = isLive ? '🔴 LIVE' : '🟡 PAPER';
   modeEl.style.background = isLive ? '#1c0a0a' : '#1c1200';
   modeEl.style.color = isLive ? '#ef4444' : '#fbbf24';
+  const pMode = document.getElementById('p-mode');
+  pMode.textContent = isLive ? '🔴 LIVE' : '🟡 PAPER';
+  pMode.style.color = isLive ? '#ef4444' : '#fbbf24';
 
   // P&L
   const pnl = d.daily_pnl ?? 0;
