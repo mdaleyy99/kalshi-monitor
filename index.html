@@ -171,29 +171,49 @@ tr:hover td{background:#F8FAFF}
     <div class="mkt-grid" id="mkt-grid"><div class="empty" style="grid-column:span 2">Fetching markets…</div></div>
   </div>
 
-  <!-- PRICE CHARTS (2 col) -->
-  <div class="two-col">
-    <div class="sec" style="margin-bottom:0">
-      <div class="sec-hdr">
-        <span class="sec-ttl">BTC / USD</span>
-        <span class="tag live">● LIVE</span>
+  <!-- PRICE + MOMENTUM (Polymarket style) -->
+  <div class="sec">
+    <div class="sec-hdr"><span class="sec-ttl">Live Prices &amp; Momentum</span><span class="tag live">● COINBASE WS</span></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px">
+      <div style="background:#F8FAFF;border:1px solid #E2E8FF;border-radius:10px;padding:14px 16px">
+        <div style="font-size:10px;font-weight:800;color:#9099B5;margin-bottom:6px;letter-spacing:.8px">BTC / USD</div>
+        <div id="p-btc" style="font-size:22px;font-weight:700;color:#1A1A2E;margin-bottom:10px">—</div>
+        <div style="font-size:10px;font-weight:700;color:#9099B5;text-transform:uppercase;letter-spacing:.6px;margin-bottom:4px">45s Momentum</div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <div id="m-btc" style="font-size:20px;font-weight:900;min-width:70px">0.000%</div>
+          <div style="flex:1">
+            <div style="background:#E2E8FF;border-radius:4px;height:6px;overflow:hidden;margin-bottom:3px">
+              <div id="m-btc-bar" style="height:100%;border-radius:4px;width:0%;background:#9099B5;transition:width .5s,background .5s"></div>
+            </div>
+            <div style="font-size:9px;color:#9099B5;font-weight:700">THRESHOLD: ±0.20% to trigger</div>
+          </div>
+        </div>
       </div>
-      <div style="display:flex;align-items:baseline;gap:10px;margin-bottom:12px">
-        <span id="p-btc" style="font-size:26px;font-weight:800;color:#1A1A2E">—</span>
-        <span id="m-btc" style="font-size:13px;font-weight:700;padding:3px 8px;border-radius:6px;background:#F3F4F6;color:#6B7280">0.00%</span>
+      <div style="background:#F8FAFF;border:1px solid #E2E8FF;border-radius:10px;padding:14px 16px">
+        <div style="font-size:10px;font-weight:800;color:#9099B5;margin-bottom:6px;letter-spacing:.8px">ETH / USD</div>
+        <div id="p-eth" style="font-size:22px;font-weight:700;color:#1A1A2E;margin-bottom:10px">—</div>
+        <div style="font-size:10px;font-weight:700;color:#9099B5;text-transform:uppercase;letter-spacing:.6px;margin-bottom:4px">45s Momentum</div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <div id="m-eth" style="font-size:20px;font-weight:900;min-width:70px">0.000%</div>
+          <div style="flex:1">
+            <div style="background:#E2E8FF;border-radius:4px;height:6px;overflow:hidden;margin-bottom:3px">
+              <div id="m-eth-bar" style="height:100%;border-radius:4px;width:0%;background:#9099B5;transition:width .5s,background .5s"></div>
+            </div>
+            <div style="font-size:9px;color:#9099B5;font-weight:700">THRESHOLD: ±0.20% to trigger</div>
+          </div>
+        </div>
       </div>
-      <div style="position:relative;height:160px"><canvas id="btcChart"></canvas></div>
     </div>
-    <div class="sec" style="margin-bottom:0">
-      <div class="sec-hdr">
-        <span class="sec-ttl">ETH / USD</span>
-        <span class="tag live">● LIVE</span>
+    <!-- Live price charts -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+      <div>
+        <div style="font-size:10px;font-weight:700;color:#9099B5;margin-bottom:6px;text-transform:uppercase;letter-spacing:.6px">BTC Price</div>
+        <div style="position:relative;height:140px"><canvas id="btcChart"></canvas></div>
       </div>
-      <div style="display:flex;align-items:baseline;gap:10px;margin-bottom:12px">
-        <span id="p-eth" style="font-size:26px;font-weight:800;color:#1A1A2E">—</span>
-        <span id="m-eth" style="font-size:13px;font-weight:700;padding:3px 8px;border-radius:6px;background:#F3F4F6;color:#6B7280">0.00%</span>
+      <div>
+        <div style="font-size:10px;font-weight:700;color:#9099B5;margin-bottom:6px;text-transform:uppercase;letter-spacing:.6px">ETH Price</div>
+        <div style="position:relative;height:140px"><canvas id="ethChart"></canvas></div>
       </div>
-      <div style="position:relative;height:160px"><canvas id="ethChart"></canvas></div>
     </div>
   </div>
 
@@ -284,11 +304,11 @@ const pnlChart = new Chart(document.getElementById('pnlChart'), {
   type: 'line',
   data: { datasets: [
     { label: 'P&L', data: [], borderColor: '#22C55E', backgroundColor: 'rgba(34,197,94,.08)',
-      fill: true, borderWidth: 2, pointRadius: 4, pointBackgroundColor: [], tension: 0.3 },
+      fill: true, borderWidth: 2, pointRadius: 5, pointBackgroundColor: [], tension: 0.4 },
     { label: 'Zero', data: [], borderColor: 'rgba(100,116,139,.3)', borderDash: [4,4],
       borderWidth: 1, pointRadius: 0, fill: false }
   ]},
-  options: { responsive: true, maintainAspectRatio: false, animation: false,
+  options: { responsive: true, maintainAspectRatio: false, animation: { duration: 600, easing: 'easeInOutQuart' },
     plugins: { legend: { display: false }, tooltip: { callbacks: {
       label: c => ' P&L: $' + c.parsed.y.toFixed(2),
       title: items => 'Trade #' + (items[0].dataIndex + 1)
@@ -326,7 +346,7 @@ function updatePnlChart(trades) {
   pnlChart.data.datasets[0].data = cumData;
   pnlChart.data.datasets[0].pointBackgroundColor = colors;
   pnlChart.data.datasets[1].data = cumData.map(() => 0);
-  pnlChart.update('none');
+  pnlChart.update();
 
   const pnls = closed.map(t => t.pnl);
   const best = Math.max(...pnls), worst = Math.min(...pnls), avg = pnls.reduce((a,b)=>a+b,0)/pnls.length;
@@ -401,6 +421,23 @@ function betweenCard(s) {
   </div>`;
 }
 
+// ── Momentum display ─────────────────────────────────────────────────────────
+const THRESHOLD = 0.20;
+function setMomentum(asset, pct) {
+  const el  = document.getElementById('m-' + asset);
+  const bar = document.getElementById('m-' + asset + '-bar');
+  const abs = Math.abs(pct);
+  const triggered = abs >= THRESHOLD;
+  const color = pct > 0 ? '#16A34A' : pct < 0 ? '#DC2626' : '#9099B5';
+  el.textContent = (pct >= 0 ? '+' : '') + pct.toFixed(3) + '%';
+  el.style.color = triggered ? color : '#9099B5';
+  el.style.fontWeight = triggered ? '900' : '700';
+  // Bar fills proportionally; 0.20% = 50%, 0.40% = 100%
+  const barPct = Math.min(100, (abs / (THRESHOLD * 2)) * 100);
+  bar.style.width = barPct + '%';
+  bar.style.background = triggered ? color : '#CBD5E1';
+}
+
 // ── Main state refresh ────────────────────────────────────────────────────────
 async function refresh() {
   try {
@@ -442,19 +479,11 @@ async function refresh() {
     // Price displays (from state — live charts update via WS)
     if (d.btc) {
       document.getElementById('p-btc').textContent = '$'+d.btc.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
-      const bm = d.btc_mom||0;
-      const bel = document.getElementById('m-btc');
-      bel.textContent = (bm>=0?'+':'')+bm.toFixed(3)+'%';
-      bel.style.background = bm > 0.1 ? '#ECFDF5' : bm < -0.1 ? '#FEF2F2' : '#F3F4F6';
-      bel.style.color = bm > 0.1 ? '#16A34A' : bm < -0.1 ? '#DC2626' : '#6B7280';
+      setMomentum('btc', d.btc_mom||0);
     }
     if (d.eth) {
       document.getElementById('p-eth').textContent = '$'+d.eth.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
-      const em = d.eth_mom||0;
-      const eel = document.getElementById('m-eth');
-      eel.textContent = (em>=0?'+':'')+em.toFixed(3)+'%';
-      eel.style.background = em > 0.1 ? '#ECFDF5' : em < -0.1 ? '#FEF2F2' : '#F3F4F6';
-      eel.style.color = em > 0.1 ? '#16A34A' : em < -0.1 ? '#DC2626' : '#6B7280';
+      setMomentum('eth', d.eth_mom||0);
     }
 
     // Open positions
