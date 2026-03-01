@@ -324,11 +324,11 @@ async function pollMarkets() {
 // ── Main refresh ──────────────────────────────────────────────────────────────
 async function refresh() {
   try {
-    const raw = await fetch(STATE_URL, { cache: 'no-store', headers: {'Accept':'application/vnd.github.v3.raw', 'Cache-Control':'no-cache'} }).then(r => { if (!r.ok) throw new Error(r.status); return r.json(); });
-    // GitHub contents API returns base64 if Accept header isn't set right; handle both
+    const raw = await fetch(STATE_URL, { cache: 'no-store' }).then(r => { if (!r.ok) throw new Error(r.status); return r.json(); });
+    // GitHub contents API always returns base64-encoded content
     const d = raw.content ? JSON.parse(atob(raw.content.replace(/\n/g,''))) : raw;
 
-    const alive = d.ts && (Date.now()/1000 - d.ts) < 90;
+    const alive = d.ts && (Date.now()/1000 - d.ts) < 120;
     document.getElementById('dot').className = 'dot' + (alive ? '' : ' off');
     document.getElementById('status').textContent = alive ? 'Live' : 'Stale';
     document.getElementById('offline-banner').style.display = alive ? 'none' : 'block';
