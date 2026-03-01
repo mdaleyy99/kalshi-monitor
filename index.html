@@ -228,7 +228,7 @@ tr:hover td{background:#F8FAFF}
 
 <script>
 // ── Config ────────────────────────────────────────────────────────────────────
-const DEFAULT_URL = 'https://sequences-appropriate-burns-format.trycloudflare.com/state';
+const DEFAULT_URL = 'https://raw.githubusercontent.com/mdaleyy99/kalshi-monitor/main/state.json';
 let STATE_URL = localStorage.getItem('kalshi_state_url') || DEFAULT_URL;
 
 function openSettings() {
@@ -324,7 +324,7 @@ async function pollMarkets() {
 // ── Main refresh ──────────────────────────────────────────────────────────────
 async function refresh() {
   try {
-    const d = await fetch(STATE_URL + '?t=' + Date.now(), { cache: 'no-store' }).then(r => { if (!r.ok) throw new Error(r.status); return r.json(); });
+    const d = await fetch(STATE_URL + '?t=' + Date.now(), { cache: 'no-store', headers: {'Cache-Control':'no-cache'} }).then(r => { if (!r.ok) throw new Error(r.status); return r.json(); });
 
     const alive = d.ts && (Date.now()/1000 - d.ts) < 90;
     document.getElementById('dot').className = 'dot' + (alive ? '' : ' off');
