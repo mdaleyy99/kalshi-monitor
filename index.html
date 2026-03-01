@@ -228,7 +228,7 @@ tr:hover td{background:#F8FAFF}
 
 <script>
 // ── Config ────────────────────────────────────────────────────────────────────
-const DEFAULT_URL = 'https://raw.githubusercontent.com/mdaleyy99/kalshi-monitor/main/state.json';
+const DEFAULT_URL = 'https://api.github.com/repos/mdaleyy99/kalshi-monitor/contents/state.json';
 let STATE_URL = localStorage.getItem('kalshi_state_url') || DEFAULT_URL;
 
 function openSettings() {
@@ -324,7 +324,9 @@ async function pollMarkets() {
 // ── Main refresh ──────────────────────────────────────────────────────────────
 async function refresh() {
   try {
-    const d = await fetch(STATE_URL + '?t=' + Date.now(), { cache: 'no-store', headers: {'Cache-Control':'no-cache'} }).then(r => { if (!r.ok) throw new Error(r.status); return r.json(); });
+    const raw = await fetch(STATE_URL, { cache: 'no-store', headers: {'Accept':'application/vnd.github.v3.raw', 'Cache-Control':'no-cache'} }).then(r => { if (!r.ok) throw new Error(r.status); return r.json(); });
+    // GitHub contents API returns base64 if Accept header isn't set right; handle both
+    const d = raw.content ? JSON.parse(atob(raw.content.replace(/\n/g,''))) : raw;
 
     const alive = d.ts && (Date.now()/1000 - d.ts) < 90;
     document.getElementById('dot').className = 'dot' + (alive ? '' : ' off');
